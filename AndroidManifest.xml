@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.benzeneos.pushcompat"
+    android:versionCode="1"
+    android:versionName="1">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
+    <uses-permission android:name="com.benzeneos.pushcompat.MANAGE" />
+
+    <permission
+        android:name="com.benzeneos.pushcompat.MANAGE"
+        android:protectionLevel="signature" />
+
+    <queries>
+        <intent>
+            <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="false">
+
+        <activity
+            android:name=".UnifiedPushLinkActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="link"
+                    android:scheme="unifiedpush" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name=".ManagementProvider"
+            android:authorities="com.benzeneos.pushcompat.management"
+            android:exported="true"
+            android:singleUser="true"
+            android:permission="com.benzeneos.pushcompat.MANAGE" />
+
+        <service
+            android:name=".PushService"
+            android:exported="true"
+            android:singleUser="true"
+            android:permission="com.benzeneos.pushcompat.MANAGE"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Maintains the user-selected push relay connection" />
+        </service>
+
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:singleUser="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".PackageChangeReceiver"
+            android:exported="true"
+            android:singleUser="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_FULLY_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".UnifiedPushDistributor"
+            android:exported="true"
+            android:singleUser="true">
+            <intent-filter>
+                <action android:name="org.unifiedpush.android.distributor.REGISTER" />
+                <action android:name="org.unifiedpush.android.distributor.UNREGISTER" />
+                <action android:name="org.unifiedpush.android.distributor.MESSAGE_ACK" />
+                <action android:name="org.unifiedpush.android.distributor.feature.BYTES_MESSAGE" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

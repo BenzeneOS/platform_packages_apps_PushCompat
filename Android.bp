@@ -1,0 +1,33 @@
+android_app {
+    name: "PushCompat",
+    certificate: "platform",
+    privileged: true,
+    platform_apis: true,
+    compile_multilib: "64",
+    jni_libs: ["libpushcompat_jni"],
+    srcs: [
+        "src/**/*.kt",
+    ],
+    resource_dirs: [
+        "res",
+    ],
+    manifest: "AndroidManifest.xml",
+    required: [
+        "etc_permissions_privapp-permissions-com.benzeneos.pushcompat.xml",
+        "etc_sysconfig_com.benzeneos.pushcompat.xml",
+    ],
+}
+
+prebuilt_etc {
+    name: "etc_permissions_privapp-permissions-com.benzeneos.pushcompat.xml",
+    src: "etc/permissions/privapp-permissions-com.benzeneos.pushcompat.xml",
+    sub_dir: "permissions",
+    filename_from_src: true,
+}
+
+prebuilt_etc {
+    name: "etc_sysconfig_com.benzeneos.pushcompat.xml",
+    src: "etc/sysconfig/com.benzeneos.pushcompat.xml",
+    sub_dir: "sysconfig",
+    filename_from_src: true,
+}

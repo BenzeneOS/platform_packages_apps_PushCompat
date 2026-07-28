@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.benzeneos.pushcompat">
+        <permission name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    </privapp-permissions>
+</permissions>

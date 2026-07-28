@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PushCompat</string>
+    <string name="relay_channel_name">PushCompat connection</string>
+    <string name="relay_running">Connected to relay</string>
+    <string name="relay_connecting">Connecting to relay…</string>
+</resources>
