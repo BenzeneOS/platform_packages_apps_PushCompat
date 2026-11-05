@@ -9,6 +9,7 @@ import android.os.UserHandle
 import com.android.internal.pushcompat.FirebaseReceiverResolver
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
@@ -283,6 +284,9 @@ internal fun postBridgeJson(
             connection.errorStream
         }
         val responseBody = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+        if (responseCode in 500..599) {
+            throw IOException("bridge returned HTTP $responseCode: ${responseBody.take(256)}")
+        }
         if (responseCode !in 200..299) {
             error("bridge returned HTTP $responseCode: ${responseBody.take(256)}")
         }
