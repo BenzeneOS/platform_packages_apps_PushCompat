@@ -813,8 +813,14 @@ class PushService : Service() {
                 }
                 if (endpoint != registration.endpoint) {
                     val updated = registration.copy(endpoint = endpoint)
-                    UnifiedPushDistributor.notifyNewEndpoint(this, userId, updated)
-                    store.saveNativeRegistration(updated)
+                    if (store.replaceNativeRegistration(registration, updated)) {
+                        try {
+                            UnifiedPushDistributor.notifyNewEndpoint(this, userId, updated)
+                        } catch (e: Exception) {
+                            store.replaceNativeRegistration(updated, registration)
+                            throw e
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {

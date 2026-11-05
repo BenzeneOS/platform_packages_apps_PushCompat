@@ -440,6 +440,28 @@ class RelayStore(
         ManagementProvider.notifyUnifiedPush(context)
     }
 
+    fun replaceNativeRegistration(
+        expected: NativeRegistration,
+        updated: NativeRegistration,
+    ): Boolean {
+        val replaced =
+            synchronized(STORE_LOCK) {
+                val encoded = encodedNativeRegistrations()
+                val current =
+                    encoded.firstOrNull { decodeNativeRegistration(it) == expected }
+                        ?: return@synchronized false
+                saveEncodedNativeRegistrations(
+                    encoded - current + encodeNativeRegistration(updated),
+                )
+                true
+            }
+        if (replaced) {
+            ManagementProvider.notifyStatus(context)
+            ManagementProvider.notifyUnifiedPush(context)
+        }
+        return replaced
+    }
+
     fun removeNativeRegistration(
         appId: String,
         connectorToken: String,
