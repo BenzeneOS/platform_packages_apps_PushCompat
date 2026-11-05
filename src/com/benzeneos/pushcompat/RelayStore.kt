@@ -428,7 +428,10 @@ class RelayStore(
         synchronized(STORE_LOCK) {
             val encoded =
                 encodedNativeRegistrations().filterTo(mutableSetOf()) { value ->
-                    decodeNativeRegistration(value)?.connectorToken != registration.connectorToken
+                    val existing = decodeNativeRegistration(value)
+                    existing == null ||
+                        existing.appId != registration.appId ||
+                        existing.connectorToken != registration.connectorToken
                 }
             encoded.add(encodeNativeRegistration(registration))
             saveEncodedNativeRegistrations(encoded)
