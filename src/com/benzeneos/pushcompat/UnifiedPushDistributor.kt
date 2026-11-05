@@ -74,6 +74,13 @@ class UnifiedPushDistributor : BroadcastReceiver() {
         val store = RelayStore(context, userId)
         try {
             require(vapid == null || isValidVapidKey(vapid)) { "Malformed VAPID key" }
+            // Connectors re-register on every start. Reconcile already keeps a known
+            // registration alive on the bridge, and running it here would restart the relay.
+            val known = store.findNativeRegistration(appId, connectorToken)
+            if (known != null && known.vapid == vapid) {
+                notifyNewEndpoint(context, userId, known)
+                return
+            }
             val bridgeClient = BridgeClient(store)
             val endpoint = bridgeClient.registerUnifiedPush(appId, connectorToken, vapid)
             check(bridgeClient.isCurrent()) { "Bridge endpoint changed during registration" }
