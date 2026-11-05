@@ -13,6 +13,7 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.util.Slog
 import java.io.IOException
+import java.util.Base64
 import java.util.concurrent.Executors
 
 class UnifiedPushDistributor : BroadcastReceiver() {
@@ -72,6 +73,7 @@ class UnifiedPushDistributor : BroadcastReceiver() {
     ) {
         val store = RelayStore(context, userId)
         try {
+            require(vapid == null || isValidVapidKey(vapid)) { "Malformed VAPID key" }
             val bridgeClient = BridgeClient(store)
             val endpoint = bridgeClient.registerUnifiedPush(appId, connectorToken, vapid)
             check(bridgeClient.isCurrent()) { "Bridge endpoint changed during registration" }
@@ -188,7 +190,22 @@ class UnifiedPushDistributor : BroadcastReceiver() {
         private const val EXTRA_PENDING_INTENT = "pi"
         private const val EXTRA_BYTES_MESSAGE = "bytesMessage"
         private const val MAX_TOKEN_BYTES = 100
+        private const val VAPID_KEY_LENGTH = 87
+        private const val VAPID_KEY_BYTES = 65
         private val executor = Executors.newFixedThreadPool(4)
+
+        private fun isValidVapidKey(key: String): Boolean {
+            if (key.length != VAPID_KEY_LENGTH || '=' in key) {
+                return false
+            }
+            val decoded =
+                try {
+                    Base64.getUrlDecoder().decode(key)
+                } catch (e: IllegalArgumentException) {
+                    return false
+                }
+            return decoded.size == VAPID_KEY_BYTES && decoded[0] == 0x04.toByte()
+        }
 
         fun deliverMessage(
             context: Context,
