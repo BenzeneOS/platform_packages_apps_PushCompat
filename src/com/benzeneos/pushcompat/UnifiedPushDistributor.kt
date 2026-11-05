@@ -30,7 +30,7 @@ class UnifiedPushDistributor : BroadcastReceiver() {
         }
         val userId = senderUserId().takeIf { it >= 0 } ?: return
         val senderPackage =
-            resolveSenderPackage(context, userId, intent, connectorToken) ?: return
+            resolveSenderPackage(context, userId, action, intent, connectorToken) ?: return
         val vapid = intent.getStringExtra(EXTRA_VAPID)
         val pendingResult = goAsync()
         executor.execute {
@@ -148,6 +148,7 @@ class UnifiedPushDistributor : BroadcastReceiver() {
     private fun resolveSenderPackage(
         context: Context,
         userId: Int,
+        action: String,
         intent: Intent,
         connectorToken: String,
     ): String? {
@@ -166,6 +167,9 @@ class UnifiedPushDistributor : BroadcastReceiver() {
             if (targetSdk != null && targetSdk < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 return packageName
             }
+        }
+        if (action != ACTION_UNREGISTER) {
+            return null
         }
         return RelayStore(context, userId)
             .nativeRegistrations()
