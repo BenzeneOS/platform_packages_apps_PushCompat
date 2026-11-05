@@ -54,7 +54,7 @@ class UnifiedPushDistributor : BroadcastReceiver() {
         }
     }
 
-    // The receiver is singleUser, so the broadcast's own user is always the owner.
+    // The receiver is singleUser, so the registration belongs to the sender's user.
     private fun senderUserId(): Int {
         val uid = getSentFromUid()
         return if (uid == Process.INVALID_UID) {
@@ -77,22 +77,15 @@ class UnifiedPushDistributor : BroadcastReceiver() {
             val bridgeClient = BridgeClient(store)
             val endpoint = bridgeClient.registerUnifiedPush(appId, connectorToken, vapid)
             check(bridgeClient.isCurrent()) { "Bridge endpoint changed during registration" }
-            store.saveNativeRegistration(
+            val registration =
                 NativeRegistration(
                     appId = appId,
                     connectorToken = connectorToken,
                     endpoint = endpoint,
                     vapid = vapid,
-                ),
-            )
-            sendConnectorIntent(
-                context,
-                userId,
-                appId,
-                Intent(ACTION_NEW_ENDPOINT)
-                    .putExtra(EXTRA_TOKEN, connectorToken)
-                    .putExtra(EXTRA_ENDPOINT, endpoint),
-            )
+                )
+            store.saveNativeRegistration(registration)
+            notifyNewEndpoint(context, userId, registration)
             PushService.reconcile(context)
         } catch (e: Exception) {
             val reason = if (e is IOException) "NETWORK" else "INTERNAL_ERROR"
